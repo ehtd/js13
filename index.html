@@ -2,11 +2,21 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
+
+    <script src="player.js"></script>
+    <script src="canvasManagement.js"></script>
+
     <title>A JS game in under 13kb</title>
+
+    <style type="text/css">
+        canvas { border: 1px solid black; }
+    </style>
+
 </head>
-<script src="player.js"></script>
-<body>
-<p>This year has kept people busy crafting little things. It started on May 23, 2011 when Jed Schmidt created the <a href='https://gist.github.com/962807'>140byt.es master GIST</a> thus throwing the ball for a tweet-sized, fork-to-play, community-curated collection of JavaScript. Later, on September 26, 2011 Viznut released the <a href='http://www.youtube.com/watch?v=GtQdIYUtAHg'>Experimental music from very short C programs</a> video on Youtube. Soon people started playing with various formulas and building tools to test them. The time has come for these two projects to make tiny babies. Behold the 140bytes music softSynth in JavaScript!</p>	<div class='middle'>
+
+
+<body onload="draw();">
+
     <input type=text id=formula value="((t*15) | t | t>>7)&255" size=60/>
     <button id=generate>&#x266a; Generate sound &#x266c;</button>
     <audio id=audio controls loop style="display: none;"></audio>
@@ -27,7 +37,10 @@
      _.button.onclick = startPlayer;
  </script>
 
-</div>
+<br>
+
+
+<canvas id=myCanvas width="150" height="150"></canvas>
 
 </body>
 </html>
