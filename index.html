@@ -4,58 +4,29 @@
     <meta charset="UTF-8">
     <title>A JS game in under 13kb</title>
 </head>
+<script src="player.js"></script>
 <body>
 <p>This year has kept people busy crafting little things. It started on May 23, 2011 when Jed Schmidt created the <a href='https://gist.github.com/962807'>140byt.es master GIST</a> thus throwing the ball for a tweet-sized, fork-to-play, community-curated collection of JavaScript. Later, on September 26, 2011 Viznut released the <a href='http://www.youtube.com/watch?v=GtQdIYUtAHg'>Experimental music from very short C programs</a> video on Youtube. Soon people started playing with various formulas and building tools to test them. The time has come for these two projects to make tiny babies. Behold the 140bytes music softSynth in JavaScript!</p>	<div class='middle'>
     <input type=text id=formula value="((t*15) | t | t>>7)&255" size=60/>
     <button id=generate>&#x266a; Generate sound &#x266c;</button>
     <audio id=audio controls loop style="display: none;"></audio>
-    <script>
+ <script>
+     //http://countercomplex.blogspot.mx/2011/10/algorithmic-symphonies-from-one-line-of.html
+     //(t*5&t>>7)|(t*3&t>>10)
 
-        //From http://www.p01.org/releases/140bytes_music_softSynth/
-        (function()
-        {
+     //((t*10)|(t*3 &t >> 15)|(t*30 &t >> 70) | (sin(t)))&255
+     //((t*15) | t | t>>7)&255
 
-            //http://countercomplex.blogspot.mx/2011/10/algorithmic-symphonies-from-one-line-of.html
-            //(t*5&t>>7)|(t*3&t>>10)
+     //	faster implementation in 142bytes
+     var softsynth = function(f){return eval("for(var t=0,S='RIFF_oO_WAVEfmt "+atob('EAAAAAEAAQBAHwAAQB8AAAEACAA')+"data';++t<3e5;)S+=String.fromCharCode("+f+")")};
 
-            //((t*10)|(t*3 &t >> 15)|(t*30 &t >> 70) | (sin(t)))&255
-            //((t*15) | t | t>>7)&255
-            //	original implementation in 138bytes
-            //var softsynth = function(f){for(var t=0,S='RIFF_oO_WAVEfmt '+atob('EAAAAAEAAQBAHwAAQB8AAAEACAA')+'data';++t<3e5;)S+=String.fromCharCode(eval(f));return S};
+     var e,_={};
+     _.button 	= document.getElementById('generate');
+     _.audio		= document.getElementById('audio');
+     _.formula	= document.getElementById('formula');
+     _.button.onclick = startPlayer;
+ </script>
 
-            //	faster implementation in 142bytes
-            var softsynth = function(f){return eval("for(var t=0,S='RIFF_oO_WAVEfmt "+atob('EAAAAAEAAQBAHwAAQB8AAAEACAA')+"data';++t<3e5;)S+=String.fromCharCode("+f+")")};
-
-            var e,_={};
-            _.button 	= document.getElementById('generate');
-            _.audio		= document.getElementById('audio');
-            _.formula	= document.getElementById('formula');
-
-            _.button.onclick = function()
-            {
-                _.button.disabled = true;
-                _.audio.parentNode.style.opacity = .3;
-                try
-                {
-                    //	allow sin/cos/tan/floor/ceil shorthands
-                    var crazyFormula = _.formula.value.replace(/(sin|cos|tan|floor|ceil)/g,'Math.$1');
-
-                    _.audio.stop&&_.audio.stop();
-                    _.audio.src = 'data:audio/wav;base64,'+btoa( softsynth( crazyFormula ) );
-                    _.audio.title = _.formula.value;
-                    _.audio.play();
-                }
-                catch(e)
-                {
-                    alert( e );
-                }
-                _.audio.parentNode.style.opacity = 1;
-                _.button.disabled = false;
-            }
-
-        })();
-
-    </script>
 </div>
 
 </body>
