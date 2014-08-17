@@ -16,7 +16,7 @@ var colTileCount = canvas.width/tileSize;
 var destructibleWallProbability = 0;
 
 var hero = {
-    speed: 32,
+    speed: 1,
     x:0,
     y:0,
     hp:10,
@@ -51,8 +51,8 @@ var topLayer = [];
 
 // Reset the game when the player catches a monster
 var reset = function () {
-    hero.x = 32;
-    hero.y = 32;
+    hero.x = 1;
+    hero.y = 1;
 
     groundLayer = generateBackground();
     topLayer = generateTerrain();
@@ -61,7 +61,7 @@ var reset = function () {
     //clear up terrain for each enemy
     enemies.forEach(function(enemy){
 
-        topLayer[ enemy.y/tileSize ][ enemy.x/tileSize ] = 0;
+        topLayer[enemy.y][enemy.x] = 0;
     });
 
     //TODO: Add portals
@@ -80,7 +80,7 @@ var isEnemy = function(row,column){
 
         if (!enemy.alive) return;
 
-        if (enemy.x/tileSize == column && enemy.y/tileSize == row){
+        if (enemy.x == column && enemy.y == row){
             enemyFound = true;
             enemy.hp -= hero.attack;
 
@@ -96,7 +96,7 @@ var isEnemy = function(row,column){
 
 var isHardWall = function(row, column){
 
-    var tile = topLayer[ row ][ column ];
+    var tile = topLayer[row][column];
 
     if (tile == hardWallIndex){
         return true;
@@ -107,13 +107,17 @@ var isHardWall = function(row, column){
 
 var isDestructibleWall = function(row, column){
 
-    var tile = topLayer[ row ][ column ];
+    var tile = topLayer[row][column];
 
     if (tile == destructibleWallIndex){
         return true;
     }
 
     return false;
+}
+
+var moveToPlayer = function(enemy){
+
 }
 
 var KEY_UP = 38;
@@ -124,8 +128,8 @@ var KEY_RIGHT = 39;
 var update = function (modifier) {
     if (KEY_UP in keysDown && !playerHasMoved) {
 
-        var row = (hero.y / tileSize) - 1;
-        var column = (hero.x / tileSize);
+        var row = hero.y - 1;
+        var column = hero.x;
 
 
         if (isDestructibleWall(row,column)){
@@ -142,8 +146,8 @@ var update = function (modifier) {
 
     if (KEY_DOWN in keysDown && !playerHasMoved) {
 
-        var row = (hero.y / tileSize) + 1;
-        var column = (hero.x / tileSize);
+        var row = hero.y + 1;
+        var column = hero.x;
 
         if (isDestructibleWall(row,column)){
             topLayer[row][column] = 0;
@@ -158,8 +162,8 @@ var update = function (modifier) {
     }
     if (KEY_LEFT in keysDown && !playerHasMoved) {
 
-        var row = (hero.y / tileSize);
-        var column = (hero.x / tileSize) - 1;
+        var row = hero.y;
+        var column = hero.x - 1;
 
         if (isDestructibleWall(row,column)){
             topLayer[row][column] = 0;
@@ -173,8 +177,8 @@ var update = function (modifier) {
     }
     if (KEY_RIGHT in keysDown && !playerHasMoved) {
 
-        var row = (hero.y / tileSize);
-        var column = (hero.x / tileSize) + 1;
+        var row = hero.y;
+        var column = hero.x + 1;
 
         if (isDestructibleWall(row,column)){
             topLayer[row][column] = 0;
@@ -189,7 +193,7 @@ var update = function (modifier) {
 };
 
 var drawHero = function(){
-    ctx.drawImage(tilesetImage, (3 * tileSize), (2 * tileSize), tileSize, tileSize, hero.x, hero.y, tileSize, tileSize);
+    ctx.drawImage(tilesetImage, (3 * tileSize), (2 * tileSize), tileSize, tileSize, hero.x*tileSize, hero.y*tileSize-10, tileSize, tileSize);
 }
 
 var drawEnemy = function(enemy){
@@ -212,7 +216,7 @@ var drawEnemy = function(enemy){
 
     }
 
-    ctx.drawImage(tilesetImage, (col * tileSize), (row * tileSize), tileSize, tileSize, enemy.x, enemy.y, tileSize, tileSize);
+    ctx.drawImage(tilesetImage, (col * tileSize), (row * tileSize), tileSize, tileSize, enemy.x*tileSize, enemy.y*tileSize-10, tileSize, tileSize);
 }
 
 var render = function () {
@@ -257,7 +261,7 @@ var blueCentaurIndex = 7;
 var getEnemy = function (type){
 
     var enemy = {
-        speed: 32,
+        speed: 1,
         x:0,
         y:0,
         hp:0,
@@ -267,8 +271,8 @@ var getEnemy = function (type){
 
     enemy.type = type;
 
-    enemy.x = (Math.floor((Math.random() * (colTileCount-2)) + 1)) * tileSize;
-    enemy.y = (Math.floor((Math.random() * (rowTileCount-2)) + 1)) * tileSize;
+    enemy.x = (Math.floor((Math.random() * (colTileCount-2)) + 1));
+    enemy.y = (Math.floor((Math.random() * (rowTileCount-2)) + 1));
 
     switch (type){
         case redCentaurIndex:
@@ -368,7 +372,7 @@ var generateTerrain = function()
     layer.push(getFullRowWall());
 
     //Always clear the space for hero
-    layer[ hero.y/32 ][ hero.x/32 ] = 0;
+    layer[hero.y][hero.x] = 0;
 
     return layer;
 }
