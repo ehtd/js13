@@ -93,6 +93,17 @@ var isHardWall = function(row, column){
     return false;
 }
 
+var isDestructibleWall = function(row, column){
+
+    var tile = topLayer[ row ][ column ];
+
+    if (tile == destructibleWallIndex){
+        return true;
+    }
+
+    return false;
+}
+
 var KEY_UP = 38;
 var KEY_DOWN = 40;
 var KEY_LEFT = 37;
@@ -104,9 +115,13 @@ var update = function (modifier) {
         var row = (hero.y / tileSize) - 1;
         var column = (hero.x / tileSize);
 
-        if (!isHardWall(row,column)){
+
+        if (isDestructibleWall(row,column)){
+            topLayer[row][column] = 0;
+        } else if (!isHardWall(row,column)){
             hero.y -= hero.speed;
         }
+
         playerHasMoved = true;
 
     }
@@ -116,7 +131,9 @@ var update = function (modifier) {
         var row = (hero.y / tileSize) + 1;
         var column = (hero.x / tileSize);
 
-        if (!isHardWall(row,column)) {
+        if (isDestructibleWall(row,column)){
+            topLayer[row][column] = 0;
+        } else if (!isHardWall(row,column)) {
             hero.y += hero.speed;
         }
 
@@ -128,7 +145,9 @@ var update = function (modifier) {
         var row = (hero.y / tileSize);
         var column = (hero.x / tileSize) - 1;
 
-        if (!isHardWall(row,column)) {
+        if (isDestructibleWall(row,column)){
+            topLayer[row][column] = 0;
+        } else if (!isHardWall(row,column)) {
             hero.x -= hero.speed;
         }
         playerHasMoved = true;
@@ -139,7 +158,9 @@ var update = function (modifier) {
         var row = (hero.y / tileSize);
         var column = (hero.x / tileSize) + 1;
 
-        if (!isHardWall(row,column)) {
+        if (isDestructibleWall(row,column)){
+            topLayer[row][column] = 0;
+        } else if (!isHardWall(row,column)) {
             hero.x += hero.speed;
         }
         playerHasMoved = true;
