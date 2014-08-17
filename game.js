@@ -13,7 +13,7 @@ var tileSize = 32;
 var rowTileCount = canvas.height/tileSize;
 var colTileCount = canvas.width/tileSize;
 
-var destructibleWallProbability = 0;
+var destructibleWallProbability = 1;
 
 var hero = {
     speed: 1,
@@ -118,6 +118,76 @@ var isDestructibleWall = function(row, column){
 
 var moveToPlayer = function(enemy){
 
+    if (!enemy.alive) return;
+
+    //TODO: Improve, this is first draft
+
+    var xDistance = Math.abs(hero.x-enemy.x);
+    var yDistance = Math.abs(hero.y-enemy.y);
+
+    var manhattanDistance = xDistance + yDistance;
+
+    if (manhattanDistance == 1){//Attack player directly
+
+        hero.hp -= enemy.attack;
+
+        return;
+    }
+
+    //TODO: avoid enemy overlap
+    if (yDistance > xDistance) { //Try to move first in Y
+
+        if (hero.y > enemy.y){ //Move down
+
+            var row = enemy.y + 1;
+            var column = enemy.x;
+
+            if (isDestructibleWall(row,column)){
+                topLayer[row][column] = 0;
+            } else{
+                enemy.y += 1;
+            }
+
+        } else{ //Move up
+
+            var row = enemy.y - 1;
+            var column = enemy.x;
+
+            if (isDestructibleWall(row,column)){
+                topLayer[row][column] = 0;
+            } else{
+                enemy.y -= 1;
+            }
+
+        }
+    } else{
+
+        if (hero.x > enemy.x){ //Move right
+
+            var row = enemy.y;
+            var column = enemy.x + 1;
+
+            if (isDestructibleWall(row,column)){
+                topLayer[row][column] = 0;
+            } else{
+                enemy.x += 1;
+            }
+
+        } else{ //Move left
+
+            var row = enemy.y;
+            var column = enemy.x - 1;
+
+            if (isDestructibleWall(row,column)){
+                topLayer[row][column] = 0;
+            } else{
+                enemy.x -= 1;
+            }
+
+        }
+
+    }
+
 }
 
 var KEY_UP = 38;
@@ -142,6 +212,8 @@ var update = function (modifier) {
 
         playerHasMoved = true;
 
+        enemies.forEach(moveToPlayer);
+
     }
 
     if (KEY_DOWN in keysDown && !playerHasMoved) {
@@ -159,6 +231,8 @@ var update = function (modifier) {
 
         playerHasMoved = true;
 
+        enemies.forEach(moveToPlayer);
+
     }
     if (KEY_LEFT in keysDown && !playerHasMoved) {
 
@@ -174,6 +248,8 @@ var update = function (modifier) {
         }
         playerHasMoved = true;
 
+        enemies.forEach(moveToPlayer);
+
     }
     if (KEY_RIGHT in keysDown && !playerHasMoved) {
 
@@ -188,6 +264,8 @@ var update = function (modifier) {
             hero.x += hero.speed;
         }
         playerHasMoved = true;
+
+        enemies.forEach(moveToPlayer);
     }
 
 };
@@ -304,7 +382,7 @@ var generateEnemies = function() {
         enemies.push(enemy);
     }
 
-    //TODO: Validate enemies do not spawn in same place
+    //TODO: Validate enemies do not spawn in same place or too near player
 }
 
 var hardWallIndex = 12;
