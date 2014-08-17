@@ -3,6 +3,7 @@
  */
 
 //TODO: Add fog of war, maybe using oil drop
+//TODO: Increase hero attack after killing an enemy, reduce it to normal after certain steps
 
 
 var canvas = document.getElementById('myCanvas');
@@ -60,7 +61,7 @@ var reset = function () {
     //clear up terrain for each enemy
     enemies.forEach(function(enemy){
 
-        topLayer[ enemy.y/32 ][ enemy.x/32 ] = 0;
+        topLayer[ enemy.y/tileSize ][ enemy.x/tileSize ] = 0;
     });
 
     //TODO: Add portals
@@ -70,6 +71,28 @@ var reset = function () {
 //    topLayer[ 13 ][ 10 ] = 10;
 
 };
+
+var isEnemy = function(row,column){
+
+    var enemyFound = false;
+
+    enemies.forEach(function(enemy){
+
+        if (!enemy.alive) return;
+
+        if (enemy.x/tileSize == column && enemy.y/tileSize == row){
+            enemyFound = true;
+            enemy.hp -= hero.attack;
+
+            if (enemy.hp <= 0) {
+                enemy.alive = false;
+            }
+        }
+
+    });
+
+    return enemyFound
+}
 
 var isHardWall = function(row, column){
 
@@ -107,6 +130,8 @@ var update = function (modifier) {
 
         if (isDestructibleWall(row,column)){
             topLayer[row][column] = 0;
+        } else if (isEnemy(row,column)){
+            //TODO: add experience or something
         } else if (!isHardWall(row,column)){
             hero.y -= hero.speed;
         }
@@ -122,6 +147,8 @@ var update = function (modifier) {
 
         if (isDestructibleWall(row,column)){
             topLayer[row][column] = 0;
+        } else if (isEnemy(row,column)){
+            //TODO: add experience or something
         } else if (!isHardWall(row,column)) {
             hero.y += hero.speed;
         }
@@ -136,6 +163,8 @@ var update = function (modifier) {
 
         if (isDestructibleWall(row,column)){
             topLayer[row][column] = 0;
+        } else if (isEnemy(row,column)){
+            //TODO: add experience or something
         } else if (!isHardWall(row,column)) {
             hero.x -= hero.speed;
         }
@@ -149,6 +178,8 @@ var update = function (modifier) {
 
         if (isDestructibleWall(row,column)){
             topLayer[row][column] = 0;
+        } else if (isEnemy(row,column)){
+            //TODO: add experience or something
         } else if (!isHardWall(row,column)) {
             hero.x += hero.speed;
         }
@@ -236,13 +267,12 @@ var getEnemy = function (type){
 
     enemy.type = type;
 
-
     enemy.x = (Math.floor((Math.random() * (colTileCount-2)) + 1)) * tileSize;
     enemy.y = (Math.floor((Math.random() * (rowTileCount-2)) + 1)) * tileSize;
 
     switch (type){
         case redCentaurIndex:
-            enemy.hp = 2;
+            enemy.hp = 9;
 
             break;
         case blueCentaurIndex:
@@ -265,6 +295,7 @@ var generateEnemies = function() {
 
     for (i = 0; i < enemyNumber; i++){
 
+        //TODO: random enemies
         var enemy = getEnemy(redCentaurIndex);
         enemies.push(enemy);
     }
