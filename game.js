@@ -1,6 +1,10 @@
 /**
  * Created by ehtd on 8/16/14.
  */
+
+//TODO: Add fog of war, maybe using oil drop
+
+
 var canvas = document.getElementById('myCanvas');
 var ctx = canvas.getContext('2d');
 
@@ -8,12 +12,17 @@ var tileSize = 32;
 var rowTileCount = canvas.height/tileSize;
 var colTileCount = canvas.width/tileSize;
 
+var destructibleWallProbability = 0;
+
 var hero = {
     speed: 32,
     x:0,
-    y:0
+    y:0,
+    hp:10,
+    attack:3
 }
 
+var enemies = [];
 
 var playerHasMoved = false;
 
@@ -46,39 +55,19 @@ var reset = function () {
 
     groundLayer = generateBackground();
     topLayer = generateTerrain();
+    generateEnemies();
 
-    topLayer[ 10 ][ 5 ] = hardWallIndex;
-    topLayer[ 10 ][ 4 ] = hardWallIndex;
-    topLayer[ 10 ][ 3 ] = hardWallIndex;
-    topLayer[ 10 ][ 6 ] = hardWallIndex;
+    //clear up terrain for each enemy
+    enemies.forEach(function(enemy){
 
-    topLayer[ 3 ][ 1 ] = destructibleWallIndex;
-    topLayer[ 3 ][ 2 ] = destructibleWallIndex;
-    topLayer[ 3 ][ 2 ] = destructibleWallIndex;
-    topLayer[ 2 ][ 2 ] = destructibleWallIndex;
-    topLayer[ 1 ][ 5 ] = destructibleWallIndex;
-    topLayer[ 1 ][ 4 ] = destructibleWallIndex;
-    topLayer[ 1 ][ 3 ] = destructibleWallIndex;
-    topLayer[ 1 ][ 6 ] = destructibleWallIndex;
-    topLayer[ 2 ][ 5 ] = destructibleWallIndex;
-    topLayer[ 2 ][ 4 ] = destructibleWallIndex;
-    topLayer[ 4 ][ 3 ] = destructibleWallIndex;
-    topLayer[ 4 ][ 6 ] = destructibleWallIndex;
-    topLayer[ 3 ][ 5 ] = destructibleWallIndex;
-    topLayer[ 3 ][ 4 ] = destructibleWallIndex;
-    topLayer[ 5 ][ 3 ] = destructibleWallIndex;
-    topLayer[ 5 ][ 6 ] = destructibleWallIndex;
+        topLayer[ enemy.y/32 ][ enemy.x/32 ] = 0;
+    });
 
-    //portals
-    topLayer[ 7 ][ 1 ] = 10;
-    topLayer[ 7 ][ 18 ] = 10;
-    topLayer[ 1 ][ 10 ] = 10;
-    topLayer[ 13 ][ 10 ] = 10;
-
-    topLayer[ 6 ][ 7 ] = 8;
-    topLayer[ 9 ][ 15 ] = 7;
-    topLayer[ 13 ][ 5 ] = 3;
-    topLayer[ 13 ][ 18 ] = 8;
+    //TODO: Add portals
+//    topLayer[ 7 ][ 1 ] = 10;
+//    topLayer[ 7 ][ 18 ] = 10;
+//    topLayer[ 1 ][ 10 ] = 10;
+//    topLayer[ 13 ][ 10 ] = 10;
 
 };
 
@@ -172,6 +161,29 @@ var drawHero = function(){
     ctx.drawImage(tilesetImage, (3 * tileSize), (2 * tileSize), tileSize, tileSize, hero.x, hero.y, tileSize, tileSize);
 }
 
+var drawEnemy = function(enemy){
+
+    if (!enemy.alive) return;
+
+    var row = 0;
+    var col = 0;
+
+    switch (enemy.type){
+        case redCentaurIndex:
+            col = 0;
+            row = 2;
+
+            break;
+        case blueCentaurIndex:
+            col = 3;
+            row = 1;
+            break;
+
+    }
+
+    ctx.drawImage(tilesetImage, (col * tileSize), (row * tileSize), tileSize, tileSize, enemy.x, enemy.y, tileSize, tileSize);
+}
+
 var render = function () {
 
     ctx.clearRect(0,0,canvas.width, canvas.height);
@@ -183,12 +195,16 @@ var render = function () {
 
     }
 
-    // Score
-//        ctx.fillStyle = "rgb(250, 250, 250)";
-//        ctx.font = "24px Helvetica";
-//        ctx.textAlign = "left";
-//        ctx.textBaseline = "top";
-//        ctx.fillText("Monsterrs caught: " + monstersCaught, 32, 32);
+    enemies.forEach(function(enemy){
+        drawEnemy(enemy);
+    });
+
+    //TODO: improve the display
+    ctx.fillStyle = "rgb(250, 250, 250)";
+    ctx.font = "24px Helvetica";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.fillText("HP: " + hero.hp + " A: "+hero.attack, 32, 0);
 };
 
 // The main game loop
@@ -203,6 +219,58 @@ var main = function () {
 
     requestAnimationFrame(main);
 };
+
+var redCentaurIndex = 8;
+var blueCentaurIndex = 7;
+
+var getEnemy = function (type){
+
+    var enemy = {
+        speed: 32,
+        x:0,
+        y:0,
+        hp:0,
+        attack:1,
+        alive:true
+    }
+
+    enemy.type = type;
+
+
+    enemy.x = (Math.floor((Math.random() * (colTileCount-2)) + 1)) * tileSize;
+    enemy.y = (Math.floor((Math.random() * (rowTileCount-2)) + 1)) * tileSize;
+
+    switch (type){
+        case redCentaurIndex:
+            enemy.hp = 2;
+
+            break;
+        case blueCentaurIndex:
+            enemy.hp = 1;
+
+            break;
+
+    }
+
+    return enemy;
+}
+
+var generateEnemies = function() {
+
+    //TODO: handle multiple rooms
+
+    var enemyIndexes = [redCentaurIndex, blueCentaurIndex];
+
+    var enemyNumber = 4;
+
+    for (i = 0; i < enemyNumber; i++){
+
+        var enemy = getEnemy(redCentaurIndex);
+        enemies.push(enemy);
+    }
+
+    //TODO: Validate enemies do not spawn in same place
+}
 
 var hardWallIndex = 12;
 var destructibleWallIndex = 2;
@@ -243,7 +311,14 @@ var getBorderedRowWall = function() {
     var row = [];
     row.push(hardWallIndex);
     for (var i = 1; i < colTileCount-1; i++){
-        row.push(0);
+
+        if (Math.random() > destructibleWallProbability)  {
+            row.push(0);
+        } else{
+            row.push(destructibleWallIndex);
+        }
+
+
     }
     row.push(hardWallIndex);
     return row;
@@ -251,6 +326,8 @@ var getBorderedRowWall = function() {
 
 var generateTerrain = function()
 {
+    //TODO: Add hard wall generation
+
     var layer = [];
 
     layer.push(getFullRowWall());
@@ -258,6 +335,9 @@ var generateTerrain = function()
         layer.push(getBorderedRowWall());
     }
     layer.push(getFullRowWall());
+
+    //Always clear the space for hero
+    layer[ hero.y/32 ][ hero.x/32 ] = 0;
 
     return layer;
 }
@@ -268,8 +348,6 @@ tilesetImage.src = 'js13k.png';
 tilesetImage.onload = function () {
     bgReady = true;
 };
-
-
 
 var imageNumTiles = 4;  // The number of tiles per row in the tileset image
 
