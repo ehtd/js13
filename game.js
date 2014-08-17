@@ -36,12 +36,62 @@ addEventListener("keyup", function (e) {
     canPressKey = true;
 }, false);
 
+var groundLayer = [];
+var topLayer = [];
+
 // Reset the game when the player catches a monster
 var reset = function () {
-    hero.x = 0;
-    hero.y = 0;
+    hero.x = 32;
+    hero.y = 32;
+
+    groundLayer = generateBackground();
+    topLayer = generateTerrain();
+
+    topLayer[ 10 ][ 5 ] = hardWallIndex;
+    topLayer[ 10 ][ 4 ] = hardWallIndex;
+    topLayer[ 10 ][ 3 ] = hardWallIndex;
+    topLayer[ 10 ][ 6 ] = hardWallIndex;
+
+    topLayer[ 3 ][ 1 ] = destructibleWallIndex;
+    topLayer[ 3 ][ 2 ] = destructibleWallIndex;
+    topLayer[ 3 ][ 2 ] = destructibleWallIndex;
+    topLayer[ 2 ][ 2 ] = destructibleWallIndex;
+    topLayer[ 1 ][ 5 ] = destructibleWallIndex;
+    topLayer[ 1 ][ 4 ] = destructibleWallIndex;
+    topLayer[ 1 ][ 3 ] = destructibleWallIndex;
+    topLayer[ 1 ][ 6 ] = destructibleWallIndex;
+    topLayer[ 2 ][ 5 ] = destructibleWallIndex;
+    topLayer[ 2 ][ 4 ] = destructibleWallIndex;
+    topLayer[ 4 ][ 3 ] = destructibleWallIndex;
+    topLayer[ 4 ][ 6 ] = destructibleWallIndex;
+    topLayer[ 3 ][ 5 ] = destructibleWallIndex;
+    topLayer[ 3 ][ 4 ] = destructibleWallIndex;
+    topLayer[ 5 ][ 3 ] = destructibleWallIndex;
+    topLayer[ 5 ][ 6 ] = destructibleWallIndex;
+
+    //portals
+    topLayer[ 7 ][ 1 ] = 10;
+    topLayer[ 7 ][ 18 ] = 10;
+    topLayer[ 1 ][ 10 ] = 10;
+    topLayer[ 13 ][ 10 ] = 10;
+
+    topLayer[ 6 ][ 7 ] = 8;
+    topLayer[ 9 ][ 15 ] = 7;
+    topLayer[ 13 ][ 5 ] = 3;
+    topLayer[ 13 ][ 18 ] = 8;
 
 };
+
+var isHardWall = function(row, column){
+
+    var tile = topLayer[ row ][ column ];
+
+    if (tile == hardWallIndex){
+        return true;
+    }
+
+    return false;
+}
 
 var KEY_UP = 38;
 var KEY_DOWN = 40;
@@ -50,25 +100,56 @@ var KEY_RIGHT = 39;
 
 var update = function (modifier) {
     if (KEY_UP in keysDown && !playerHasMoved) {
-        hero.y -= hero.speed;
+
+        var row = (hero.y / tileSize) - 1;
+        var column = (hero.x / tileSize);
+
+        if (!isHardWall(row,column)){
+            hero.y -= hero.speed;
+        }
         playerHasMoved = true;
+
     }
+
     if (KEY_DOWN in keysDown && !playerHasMoved) {
-        hero.y += hero.speed ;
+
+        var row = (hero.y / tileSize) + 1;
+        var column = (hero.x / tileSize);
+
+        if (!isHardWall(row,column)) {
+            hero.y += hero.speed;
+        }
+
         playerHasMoved = true;
 
     }
     if (KEY_LEFT in keysDown && !playerHasMoved) {
-        hero.x -= hero.speed;
+
+        var row = (hero.y / tileSize);
+        var column = (hero.x / tileSize) - 1;
+
+        if (!isHardWall(row,column)) {
+            hero.x -= hero.speed;
+        }
         playerHasMoved = true;
 
     }
     if (KEY_RIGHT in keysDown && !playerHasMoved) {
-        hero.x += hero.speed;
+
+        var row = (hero.y / tileSize);
+        var column = (hero.x / tileSize) + 1;
+
+        if (!isHardWall(row,column)) {
+            hero.x += hero.speed;
+        }
         playerHasMoved = true;
     }
 
 };
+
+var drawHero = function(){
+    ctx.drawImage(tilesetImage, (3 * tileSize), (2 * tileSize), tileSize, tileSize, hero.x, hero.y, tileSize, tileSize);
+}
 
 var render = function () {
 
@@ -77,8 +158,8 @@ var render = function () {
     if (bgReady) {
         drawTiledBackground();
 
-        //draw hero
-        ctx.drawImage(tilesetImage, (3 * tileSize), (2 * tileSize), tileSize, tileSize, hero.x, hero.y, tileSize, tileSize);
+        drawHero();
+
     }
 
     // Score
@@ -102,41 +183,63 @@ var main = function () {
     requestAnimationFrame(main);
 };
 
-var groundLayer = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-   ];
+var hardWallIndex = 12;
+var destructibleWallIndex = 2;
+var backgroundIndex = 1;
 
-var topLayer = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-];
+var getBackgroundRow = function() {
+    var row = [];
+
+    for (var i = 0; i < colTileCount; i++){
+        row.push(backgroundIndex);
+    }
+
+    return row;
+}
+
+var generateBackground = function()
+{
+    var layer = [];
+
+    for (var i = 0; i < rowTileCount; i++){
+        layer.push(getBackgroundRow());
+    }
+
+    return layer;
+}
+
+var getFullRowWall = function() {
+    var row = [];
+
+    for (var i = 0; i < colTileCount; i++){
+        row.push(hardWallIndex);
+    }
+
+    return row;
+}
+
+var getBorderedRowWall = function() {
+    var row = [];
+    row.push(hardWallIndex);
+    for (var i = 1; i < colTileCount-1; i++){
+        row.push(0);
+    }
+    row.push(hardWallIndex);
+    return row;
+}
+
+var generateTerrain = function()
+{
+    var layer = [];
+
+    layer.push(getFullRowWall());
+    for (var i = 1; i < rowTileCount-1; i++){
+        layer.push(getBorderedRowWall());
+    }
+    layer.push(getFullRowWall());
+
+    return layer;
+}
 
 var bgReady = false;
 var tilesetImage = new Image();
@@ -157,10 +260,10 @@ function drawTiledBackground () {
             var tileCol = (tile % imageNumTiles) | 0;
             ctx.drawImage(tilesetImage, (tileCol * tileSize), (tileRow * tileSize), tileSize, tileSize, (c * tileSize), (r * tileSize), tileSize, tileSize);
 
-//                tile = layer1[ r ][ c ];
-//                tileRow = (tile / imageNumTiles) | 0;
-//                tileCol = (tile % imageNumTiles) | 0;
-//                ctx.drawImage(tilesetImage, (tileCol * tileSize), (tileRow * tileSize), tileSize, tileSize, (c * tileSize), (r * tileSize), tileSize, tileSize);
+            tile = topLayer[ r ][ c ];
+            tileRow = (tile / imageNumTiles) | 0;
+            tileCol = (tile % imageNumTiles) | 0;
+            ctx.drawImage(tilesetImage, (tileCol * tileSize), (tileRow * tileSize), tileSize, tileSize, (c * tileSize), (r * tileSize), tileSize, tileSize);
 
         }
     }
