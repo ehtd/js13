@@ -297,6 +297,75 @@ var drawEnemy = function(enemy){
     ctx.drawImage(tilesetImage, (col * tileSize), (row * tileSize), tileSize, tileSize, enemy.x*tileSize, enemy.y*tileSize-10, tileSize, tileSize);
 }
 
+
+var generateFOW = function (){
+
+    var FOW = [];
+
+        for (var r = 0; r < rowTileCount; r++) {
+
+            var column = [];
+
+            for (var c = 0; c < colTileCount; c++) {
+
+                column.push(0);
+            }
+
+            FOW.push(column);
+        }
+
+    return FOW;
+
+}
+
+var drawFOW = function(){
+
+    var FOW = generateFOW();
+
+    //Prepare for hero
+    for (var r = 0; r < rowTileCount; r++) {
+        for (var c = 0; c < colTileCount; c++) {
+
+            var xDistance = Math.abs(hero.x-c);
+            var yDistance = Math.abs(hero.y-r);
+
+            var manhattanDistance = xDistance + yDistance;
+
+            if (manhattanDistance < 3){
+                FOW[r][c] = 0
+            }
+            else if (manhattanDistance < 4){
+                FOW[r][c] = 0.3
+            }
+            else if (manhattanDistance < 5){
+                FOW[r][c] = 0.5
+            } else{
+                FOW[r][c] = 0.7
+            }
+
+//            enemies.forEach(function(enemy){
+//                var xDistance = Math.abs(hero.x-enemy.x);
+//                var yDistance = Math.abs(hero.y-enemy.y);
+//
+//                var manhattanDistance = xDistance + yDistance;
+//
+//                if (manhattanDistance < 8){
+//                    FOW[enemy.y][enemy.x] = 0
+//                }
+//            });
+        }
+    }
+
+    for (var r = 0; r < rowTileCount; r++) {
+        for (var c = 0; c < colTileCount; c++) {
+
+            ctx.fillStyle = "rgba(0, 0, 0,"+FOW[r][c]+")";
+            ctx.fillRect(c*tileSize, r*tileSize, tileSize, tileSize);
+        }
+    }
+
+}
+
 var render = function () {
 
     ctx.clearRect(0,0,canvas.width, canvas.height);
@@ -306,11 +375,16 @@ var render = function () {
 
         drawHero();
 
+        enemies.forEach(function(enemy){
+            drawEnemy(enemy);
+        });
+
+        drawFOW();
+
+
     }
 
-    enemies.forEach(function(enemy){
-        drawEnemy(enemy);
-    });
+
 
     //TODO: improve the display
     ctx.fillStyle = "rgb(250, 250, 250)";
