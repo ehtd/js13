@@ -8,7 +8,7 @@ var htmlmin = require('gulp-htmlmin');
 var zipFile = 'js13k.zip';
 
 var paths = {
-    scripts: ['player.js','game.js', 'canvasManagement.js'],
+    scripts: ['player.js','game.js'],
     pngs:['*.png'],
     htmls:['*.html'],
     dist:'./deploy/',
