@@ -10,10 +10,15 @@ var canvas = document.getElementById('myCanvas');
 var ctx = canvas.getContext('2d');
 
 var tileSize = 32;
-var rowTileCount = canvas.height/tileSize;
+var rowTileCount = canvas.height/tileSize + 10;
 var colTileCount = canvas.width/tileSize;
 
 var destructibleWallProbability = 1;
+
+var camera = {
+    x:0,
+    y:0
+}
 
 var hero = {
     speed: 1,
@@ -268,10 +273,13 @@ var update = function (modifier) {
         enemies.forEach(moveToPlayer);
     }
 
+    camera.x = hero.x - Math.floor((canvas.width/tileSize)/2);
+    camera.y = hero.y - Math.floor((canvas.height/tileSize)/2);
+
 };
 
 var drawHero = function(){
-    ctx.drawImage(tilesetImage, (3 * tileSize), (2 * tileSize), tileSize, tileSize, hero.x*tileSize, hero.y*tileSize-10, tileSize, tileSize);
+    ctx.drawImage(tilesetImage, (3 * tileSize), (2 * tileSize), tileSize, tileSize, (hero.x - camera.x)*tileSize, (hero.y-camera.y)*tileSize-10, tileSize, tileSize);
 }
 
 var drawEnemy = function(enemy){
@@ -294,7 +302,7 @@ var drawEnemy = function(enemy){
 
     }
 
-    ctx.drawImage(tilesetImage, (col * tileSize), (row * tileSize), tileSize, tileSize, enemy.x*tileSize, enemy.y*tileSize-10, tileSize, tileSize);
+    ctx.drawImage(tilesetImage, (col * tileSize), (row * tileSize), tileSize, tileSize, (enemy.x -camera.x)*tileSize, (enemy.y-camera.y)*tileSize-10, tileSize, tileSize);
 }
 
 
@@ -326,8 +334,8 @@ var drawFOW = function(){
     for (var r = 0; r < rowTileCount; r++) {
         for (var c = 0; c < colTileCount; c++) {
 
-            var xDistance = Math.abs(hero.x-c);
-            var yDistance = Math.abs(hero.y-r);
+            var xDistance = Math.abs(hero.x-camera.x-c);
+            var yDistance = Math.abs(hero.y-camera.y-r);
 
             var manhattanDistance = xDistance + yDistance;
 
@@ -539,17 +547,27 @@ tilesetImage.onload = function () {
 var imageNumTiles = 4;  // The number of tiles per row in the tileset image
 
 function drawTiledBackground () {
+
+    for (var r = 0; r < rowTileCount; r++) {
+        for (var c = 0; c < colTileCount; c++) {
+
+            ctx.fillStyle = "rgba(0, 0, 0, 1)";
+            ctx.fillRect(c*tileSize, r*tileSize, tileSize, tileSize);
+
+        }
+    }
+
     for (var r = 0; r < rowTileCount; r++) {
         for (var c = 0; c < colTileCount; c++) {
             var tile = groundLayer[ r ][ c ];
             var tileRow = (tile / imageNumTiles) | 0; // Bitwise OR operation
             var tileCol = (tile % imageNumTiles) | 0;
-            ctx.drawImage(tilesetImage, (tileCol * tileSize), (tileRow * tileSize), tileSize, tileSize, (c * tileSize), (r * tileSize), tileSize, tileSize);
+            ctx.drawImage(tilesetImage, (tileCol * tileSize), (tileRow * tileSize), tileSize, tileSize, ((c - camera.x) * tileSize), ((r - camera.y) * tileSize), tileSize, tileSize);
 
             tile = topLayer[ r ][ c ];
             tileRow = (tile / imageNumTiles) | 0;
             tileCol = (tile % imageNumTiles) | 0;
-            ctx.drawImage(tilesetImage, (tileCol * tileSize), (tileRow * tileSize), tileSize, tileSize, (c * tileSize), (r * tileSize), tileSize, tileSize);
+            ctx.drawImage(tilesetImage, (tileCol * tileSize), (tileRow * tileSize), tileSize, tileSize, ((c - camera.x) * tileSize), ((r - camera.y) * tileSize), tileSize, tileSize);
 
         }
     }
