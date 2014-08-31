@@ -10,8 +10,8 @@ var canvas = document.getElementById('myCanvas');
 var ctx = canvas.getContext('2d');
 
 var tileSize = 32;
-var rowTileCount = canvas.height/tileSize + 10;
-var colTileCount = canvas.width/tileSize;
+var rowTileCount = 48;//canvas.height/tileSize + 10;
+var colTileCount = 48;//canvas.width/tileSize;
 
 var destructibleWallProbability = 1;
 
@@ -52,7 +52,7 @@ addEventListener("keyup", function (e) {
 }, false);
 
 var groundLayer = [];
-var topLayer = [];
+var topLayer = [[]];
 
 // Reset the game when the player catches a monster
 var reset = function () {
@@ -60,14 +60,14 @@ var reset = function () {
     hero.y = 1;
 
     groundLayer = generateBackground();
-    topLayer = generateTerrain();
+    topLayer = createWorld();
     generateEnemies();
 
     //clear up terrain for each enemy
-    enemies.forEach(function(enemy){
-
-        topLayer[enemy.y][enemy.x] = 0;
-    });
+//    enemies.forEach(function(enemy){
+//
+//        topLayer[enemy.y][enemy.x] = 0;
+//    });
 
     //TODO: Add portals
 //    topLayer[ 7 ][ 1 ] = 10;
@@ -571,6 +571,145 @@ function drawTiledBackground () {
 
         }
     }
+}
+
+// the world grid: a 2d array of tiles
+var world = [[]];
+
+// size in the world in sprite tiles
+var worldWidth =rowTileCount;
+var worldHeight = colTileCount;
+
+// size of a tile in pixels (this is only important for drawing)
+var tileWidth = 32;
+var tileHeight = 32;
+
+function createWorld()
+{
+    birthLimit = 4;
+    deathLimit = 3;
+    chanceToStartAlive = 0.4;
+    numberOfSteps = 2;
+
+    world = generateMap();
+    1;
+//    redraw();
+
+    return world;
+}
+
+function generateMap()
+{
+    //So, first we make the map
+    var map = [[]];
+    //And randomly scatter solid blocks
+    initialiseMap(map);
+
+    //Then, for a number of steps
+    for(var i=0; i<numberOfSteps; i++){
+        //We apply our simulation rules!
+        map = doSimulationStep(map);
+    }
+
+    map[0] = getFullRowWall();
+    map[rowTileCount -1] = getFullRowWall();
+
+
+    for (var y=1; y < worldHeight -1; y++)
+    {
+        map[y][0] = hardWallIndex;
+        map[y][worldHeight -1] = hardWallIndex;
+
+    }
+
+    //And we're done!
+    return map;
+}
+
+function initialiseMap(map)
+{
+    for (var x=0; x < worldWidth; x++)
+    {
+        map[x] = [];
+        for (var y=0; y < worldHeight; y++)
+        {
+            map[x][y] = 0;
+        }
+    }
+
+    for (var x=0; x < worldWidth; x++)
+    {
+        for (var y=0; y < worldHeight; y++)
+        {
+            //Here we use our chanceToStartAlive variable
+            if (Math.random() < chanceToStartAlive)
+            //We're using numbers, not booleans, to decide if something is solid here. 0 = not solid
+                map[x][y] = destructibleWallIndex;
+        }
+    }
+
+    return map;
+}
+
+function doSimulationStep(map)
+{
+    //Here's the new map we're going to copy our data into
+    var newmap = [[]];
+    for(var x = 0; x < map.length; x++){
+        newmap[x] = [];
+        for(var y = 0; y < map[0].length; y++)
+        {
+            //Count up the neighbours
+            var nbs = countAliveNeighbours(map, x, y);
+            //If the tile is currently solid
+            if(map[x][y] > 0){
+                //See if it should die
+                if(nbs < deathLimit){
+                    newmap[x][y] = 0;
+                }
+                //Otherwise keep it solid
+                else{
+                    newmap[x][y] = destructibleWallIndex;
+                }
+            }
+            //If the tile is currently empty
+            else{
+                //See if it should become solid
+                if(nbs > birthLimit){
+                    newmap[x][y] = destructibleWallIndex;
+                }
+                else{
+                    newmap[x][y] = 0;
+                }
+            }
+        }
+    }
+
+    return newmap;
+}
+
+//This function counts the number of solid neighbours a tile has
+function countAliveNeighbours(map, x, y)
+{
+    var count = 0;
+    for(var i = -1; i < 2; i++){
+        for(var j = -1; j < 2; j++){
+            var nb_x = i+x;
+            var nb_y = j+y;
+            if(i == 0 && j == 0){
+            }
+            //If it's at the edges, consider it to be solid (you can try removing the count = count + 1)
+            else if(nb_x < 0 || nb_y < 0 ||
+                nb_x >= map.length ||
+                nb_y >= map[0].length){
+                count = count + 1;
+            }
+            else if(map[nb_x][nb_y] == destructibleWallIndex){
+                count = count + 1;
+            }
+        }
+    }
+    return count;
 }
 
 var w = window;
