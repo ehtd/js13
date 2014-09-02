@@ -219,6 +219,7 @@ var update = function (modifier) {
 
         enemies.forEach(moveToPlayer);
 
+        player.play();
     }
 
     if (KEY_DOWN in keysDown && !playerHasMoved) {
@@ -238,6 +239,7 @@ var update = function (modifier) {
 
         enemies.forEach(moveToPlayer);
 
+        player.play();
     }
     if (KEY_LEFT in keysDown && !playerHasMoved) {
 
@@ -255,6 +257,7 @@ var update = function (modifier) {
 
         enemies.forEach(moveToPlayer);
 
+        player.play();
     }
     if (KEY_RIGHT in keysDown && !playerHasMoved) {
 
@@ -271,6 +274,7 @@ var update = function (modifier) {
         playerHasMoved = true;
 
         enemies.forEach(moveToPlayer);
+        player.play();
     }
 
     camera.x = hero.x - Math.floor((canvas.width/tileSize)/2);

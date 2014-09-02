@@ -2,6 +2,11 @@
  * Created by ehtd on 8/14/14.
  */
 
+var soundURL = jsfxr([0,,0.1812,,0.1349,0.4524,,0.2365,,,,,,0.0819,,,,,1,,,,,0.5]);
+var player = new Audio();
+player.src = soundURL;
+
+
 //From http://www.p01.org/releases/140bytes_music_softSynth/
 
 //http://countercomplex.blogspot.mx/2011/10/algorithmic-symphonies-from-one-line-of.html
