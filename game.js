@@ -84,22 +84,15 @@ var reset = function () {
     topLayer = createWorld();
     generateEnemies();
 
+    //Cleaning space for the enemy
+    enemies.forEach(function(enemy){
+        topLayer[enemy.y][enemy.x] = 0;
+    });
+
     hero.x = 1;
     hero.y = 1;
 
     topLayer[hero.y][hero.x] = 0;
-
-    //clear up terrain for each enemy
-//    enemies.forEach(function(enemy){
-//
-//        topLayer[enemy.y][enemy.x] = 0;
-//    });
-
-    //TODO: Add portals
-//    topLayer[ 7 ][ 1 ] = 10;
-//    topLayer[ 7 ][ 18 ] = 10;
-//    topLayer[ 1 ][ 10 ] = 10;
-//    topLayer[ 13 ][ 10 ] = 10;
 
 };
 
@@ -123,6 +116,18 @@ var isEnemy = function(row,column){
     });
 
     return enemyFound
+}
+
+var isTreasure = function(row, column){
+
+    var tile = topLayer[row][column];
+
+    if (tile == treasureIndex){
+
+        return true;
+    }
+
+    return false;
 }
 
 var isHardWall = function(row, column){
@@ -261,6 +266,13 @@ var update = function (modifier) {
 
         if (isDestructibleWall(row,column)){
             topLayer[row][column] = 0;
+        } else if(isTreasure(row,column)){
+            var specialProperties = [1,2,1,1,1,1,1];
+            var value = Math.floor(Math.random() * (specialProperties.length));
+
+            hero.attack += specialProperties[value];
+
+            topLayer[row][column] = 0;
         } else if (isEnemy(row,column)){
             //TODO: add experience or something
         } else if (!isHardWall(row,column)){
@@ -281,6 +293,13 @@ var update = function (modifier) {
 
         if (isDestructibleWall(row,column)){
             topLayer[row][column] = 0;
+        } else if(isTreasure(row,column)){
+            var specialProperties = [1,2,1,1,1,1,1];
+            var value = Math.floor(Math.random() * (specialProperties.length));
+
+            hero.attack += specialProperties[value];
+
+            topLayer[row][column] = 0;
         } else if (isEnemy(row,column)){
             //TODO: add experience or something
         } else if (!isHardWall(row,column)) {
@@ -300,6 +319,13 @@ var update = function (modifier) {
 
         if (isDestructibleWall(row,column)){
             topLayer[row][column] = 0;
+        } else if(isTreasure(row,column)){
+            var specialProperties = [1,2,1,1,1,1,1];
+            var value = Math.floor(Math.random() * (specialProperties.length));
+
+            hero.attack += specialProperties[value];
+
+            topLayer[row][column] = 0;
         } else if (isEnemy(row,column)){
             //TODO: add experience or something
         } else if (!isHardWall(row,column)) {
@@ -317,6 +343,13 @@ var update = function (modifier) {
         var column = hero.x + 1;
 
         if (isDestructibleWall(row,column)){
+            topLayer[row][column] = 0;
+        } else if(isTreasure(row,column)){
+            var specialProperties = [1,2,1,1,1,1,1];
+            var value = Math.floor(Math.random() * (specialProperties.length));
+
+            hero.attack += specialProperties[value];
+
             topLayer[row][column] = 0;
         } else if (isEnemy(row,column)){
             //TODO: add experience or something
@@ -749,9 +782,10 @@ function generateMap()
         map = doSimulationStep(map);
     }
 
+    placeTreasure(map);
+
     map[0] = getFullRowWall();
     map[rowTileCount -1] = getFullRowWall();
-
 
     for (var y=1; y < worldHeight -1; y++)
     {
@@ -762,6 +796,29 @@ function generateMap()
 
     //And we're done!
     return map;
+}
+var treasureIndex = 14;
+
+function placeTreasure(map)
+{
+    var t = 0;
+    //How hidden does a spot need to be for treasure?
+    //I find 5 or 6 is good. 6 for very rare treasure.
+    var treasureHiddenLimit = 5;
+    for (var x=0; x < worldWidth; x++)
+    {
+        for (var y=0; y < worldHeight; y++)
+        {
+            if(map[x][y] == 0){
+                var nbs = countAliveNeighbours(map, x, y);
+                if(nbs >= treasureHiddenLimit){
+                    map[x][y] = treasureIndex;
+                    t++;
+                }
+            }
+        }
+    }
+    console.log("Treasures: "+t);
 }
 
 function initialiseMap(map)
