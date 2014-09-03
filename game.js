@@ -23,6 +23,8 @@ var colTileCount = 48;//canvas.width/tileSize;
 
 var destructibleWallProbability = 1;
 
+var playerAlive = true;
+
 var camera = {
     x:0,
     y:0
@@ -64,9 +66,19 @@ addEventListener("keyup", function (e) {
 var groundLayer = [];
 var topLayer = [[]];
 
-// Reset the game when the player catches a monster
 var reset = function () {
 
+
+    playerAlive = true;
+    enemies = [];
+
+    hero = {
+        speed: 1,
+        x:0,
+        y:0,
+        hp:10,
+        attack:3
+    }
 
     groundLayer = generateBackground();
     topLayer = createWorld();
@@ -139,6 +151,8 @@ var moveToPlayer = function(enemy){
 
     if (!enemy.alive) return;
 
+    if (!playerAlive) return;
+
     //TODO: Improve, this is first draft
 
     var xDistance = Math.abs(hero.x-enemy.x);
@@ -150,6 +164,9 @@ var moveToPlayer = function(enemy){
 
         hero.hp -= enemy.attack;
 
+        if (hero.hp <= 0){
+            currentState = STATES.LOSE;
+        }
         return;
     }
 
@@ -221,6 +238,16 @@ var update = function (modifier) {
 
         if (KEY_X in keysDown){
             currentState = STATES.GAME;
+        }
+
+        return;
+    }
+
+    if (currentState == STATES.LOSE){
+
+        if (KEY_X in keysDown){
+            currentState = STATES.MENU;
+            reset();
         }
 
         return;
@@ -468,6 +495,46 @@ var render = function () {
         ctx.fillText("– Press X to START your adventure – ", 150, 420);
 
         ctx.drawImage(tilesetImage, (3 * tileSize), (2 * tileSize), tileSize, tileSize, (3)*tileSize, (13)*tileSize, tileSize, tileSize);
+
+    } else if (currentState == STATES.LOSE){
+
+        var shield_maiden_title = [
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0,0,0.8,0.8,0,0,0.8,0,0,0,0.8,0,0,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0,0.8,0,0.8,0,0.8,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0,0.8,0,0.8,0,0,0.8,0,0,0,0.8,0,0.8,0,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0,0.8,0,0.8,0,0.8,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0,0,0.8,0.8,0,0,0.8,0,0.8,0,0.8,0,0,0.8,0.8,0,0.8,0,0.8,0,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8]
+        ];
+
+        for (var r = 0; r < canvas.height/tileSize; r++) {
+            for (var c = 0; c < canvas.width/tileSize; c++) {
+
+                var tile = hardWallIndex;
+                var tileRow = (tile / imageNumTiles) | 0;
+                var tileCol = (tile % imageNumTiles) | 0;
+                ctx.drawImage(tilesetImage, (tileCol * tileSize), (tileRow * tileSize), tileSize, tileSize, ((c) * tileSize), ((r) * tileSize), tileSize, tileSize);
+
+                ctx.fillStyle = "rgba(0, 0, 0,"+shield_maiden_title[r][c]+")";
+                ctx.fillRect(c*tileSize, r*tileSize, tileSize, tileSize);
+            }
+        }
+
+        ctx.fillStyle = "rgb(100, 177, 164)";
+        ctx.font = "24px Helvetica";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+
+        ctx.fillText("– An honorable death... Press X to RETRY –", 130, 420);
 
     }
 
