@@ -5,6 +5,14 @@
 //TODO: Add fog of war, maybe using oil drop
 //TODO: Increase hero attack after killing an enemy, reduce it to normal after certain steps
 
+var STATES = {
+    "MENU":"menuState",
+    "GAME":"gameState",
+    "WIN":"winState",
+    "LOSE":"loseState"
+}
+
+var currentState = STATES.MENU;
 
 var canvas = document.getElementById('myCanvas');
 var ctx = canvas.getContext('2d');
@@ -38,7 +46,9 @@ var keysDown = {};
 
 addEventListener("keydown", function (e) {
 
+
     if (canPressKey){
+        console.log(e.keyCode);
         playerHasMoved = false;
         keysDown[e.keyCode] = true;
         canPressKey = false;
@@ -56,12 +66,16 @@ var topLayer = [[]];
 
 // Reset the game when the player catches a monster
 var reset = function () {
-    hero.x = 1;
-    hero.y = 1;
+
 
     groundLayer = generateBackground();
     topLayer = createWorld();
     generateEnemies();
+
+    hero.x = 1;
+    hero.y = 1;
+
+    topLayer[hero.y][hero.x] = 0;
 
     //clear up terrain for each enemy
 //    enemies.forEach(function(enemy){
@@ -199,8 +213,19 @@ var KEY_UP = 38;
 var KEY_DOWN = 40;
 var KEY_LEFT = 37;
 var KEY_RIGHT = 39;
+var KEY_X = 88;
 
 var update = function (modifier) {
+
+    if (currentState == STATES.MENU){
+
+        if (KEY_X in keysDown){
+            currentState = STATES.GAME;
+        }
+
+        return;
+    }
+
     if (KEY_UP in keysDown && !playerHasMoved) {
 
         var row = hero.y - 1;
@@ -382,28 +407,70 @@ var render = function () {
 
     ctx.clearRect(0,0,canvas.width, canvas.height);
 
-    if (bgReady) {
-        drawTiledBackground();
+    if (currentState == STATES.GAME){
+        if (bgReady) {
+            drawTiledBackground();
 
-        drawHero();
+            drawHero();
 
-        enemies.forEach(function(enemy){
-            drawEnemy(enemy);
-        });
+            enemies.forEach(function(enemy){
+                drawEnemy(enemy);
+            });
 
-        drawFOW();
+            drawFOW();
 
+
+        }
+
+        //TODO: improve the display
+        ctx.fillStyle = "rgb(250, 250, 250)";
+        ctx.font = "24px Helvetica";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        ctx.fillText("HP: " + hero.hp + " A: "+hero.attack, 32, 0);
+
+    } else if (currentState == STATES.MENU){
+
+        var shield_maiden_title = [[0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0,0,0,0.8,0,0.8,0,0.8,0,0.8,0,0,0.8,0,0.8,0.8,0,0,0.8,0.8,0.8],
+            [0.8,0,0.8,0.8,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0.8,0,0.8,0.8,0,0.8,0,0.8,0.8],
+            [0.8,0,0,0,0.8,0,0,0,0.8,0,0.8,0,0,0.8,0,0.8,0.8,0,0.8,0,0.8,0.8],
+            [0.8,0.8,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0.8,0,0.8,0.8,0,0.8,0,0.8,0.8],
+            [0.8,0,0,0,0.8,0,0.8,0,0.8,0,0.8,0,0,0.8,0,0,0.8,0,0,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0,0,0,0,0,0.8,0,0,0,0.8,0,0.8,0,0,0.8,0.8,0,0,0.8,0,0,0],
+            [0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0.8,0,0.8,0],
+            [0,0.8,0.8,0.8,0,0.8,0,0,0,0.8,0,0.8,0,0.8,0,0.8,0,0,0.8,0,0.8,0],
+            [0,0.8,0.8,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0.8,0,0.8,0],
+            [0,0.8,0.8,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0,0.8,0.8,0,0,0.8,0,0.8,0],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8]
+        ];
+
+        for (var r = 0; r < canvas.height/tileSize; r++) {
+            for (var c = 0; c < canvas.width/tileSize; c++) {
+
+                var tile = hardWallIndex;
+                var tileRow = (tile / imageNumTiles) | 0;
+                var tileCol = (tile % imageNumTiles) | 0;
+                ctx.drawImage(tilesetImage, (tileCol * tileSize), (tileRow * tileSize), tileSize, tileSize, ((c) * tileSize), ((r) * tileSize), tileSize, tileSize);
+
+                ctx.fillStyle = "rgba(0, 0, 0,"+shield_maiden_title[r][c]+")";
+                ctx.fillRect(c*tileSize, r*tileSize, tileSize, tileSize);
+            }
+        }
+
+        ctx.fillStyle = "rgb(100, 177, 164)";
+        ctx.font = "24px Helvetica";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        ctx.fillText("– Press X to START your adventure – ", 150, 420);
+
+        ctx.drawImage(tilesetImage, (3 * tileSize), (2 * tileSize), tileSize, tileSize, (3)*tileSize, (13)*tileSize, tileSize, tileSize);
 
     }
 
-
-
-    //TODO: improve the display
-    ctx.fillStyle = "rgb(250, 250, 250)";
-    ctx.font = "24px Helvetica";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "top";
-    ctx.fillText("HP: " + hero.hp + " A: "+hero.attack, 32, 0);
 };
 
 // The main game loop
