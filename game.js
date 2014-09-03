@@ -130,6 +130,20 @@ var isTreasure = function(row, column){
     return false;
 }
 
+var isHP = function(row, column){
+
+    var tile = topLayer[row][column];
+
+    if (tile == healthPotionIndex){
+
+        hero.hp += 1;
+        topLayer[row][column] = 0;
+        return true;
+    }
+
+    return false;
+}
+
 var isHardWall = function(row, column){
 
     var tile = topLayer[row][column];
@@ -273,6 +287,8 @@ var update = function (modifier) {
             hero.attack += specialProperties[value];
 
             topLayer[row][column] = 0;
+        } else if (isHP(row,column)){
+
         } else if (isEnemy(row,column)){
             //TODO: add experience or something
         } else if (!isHardWall(row,column)){
@@ -300,6 +316,8 @@ var update = function (modifier) {
             hero.attack += specialProperties[value];
 
             topLayer[row][column] = 0;
+        } else if (isHP(row,column)){
+
         } else if (isEnemy(row,column)){
             //TODO: add experience or something
         } else if (!isHardWall(row,column)) {
@@ -326,6 +344,8 @@ var update = function (modifier) {
             hero.attack += specialProperties[value];
 
             topLayer[row][column] = 0;
+        } else if (isHP(row,column)){
+
         } else if (isEnemy(row,column)){
             //TODO: add experience or something
         } else if (!isHardWall(row,column)) {
@@ -351,6 +371,8 @@ var update = function (modifier) {
             hero.attack += specialProperties[value];
 
             topLayer[row][column] = 0;
+        } else if (isHP(row,column)){
+
         } else if (isEnemy(row,column)){
             //TODO: add experience or something
         } else if (!isHardWall(row,column)) {
@@ -797,6 +819,9 @@ function generateMap()
     //And we're done!
     return map;
 }
+
+var healthPotionIndex = 15;
+
 var treasureIndex = 14;
 
 function placeTreasure(map)
@@ -812,7 +837,10 @@ function placeTreasure(map)
             if(map[x][y] == 0){
                 var nbs = countAliveNeighbours(map, x, y);
                 if(nbs >= treasureHiddenLimit){
-                    map[x][y] = treasureIndex;
+
+                    var items = [treasureIndex, healthPotionIndex];
+                    var index = Math.floor((Math.random() * items.length));
+                    map[x][y] = items[index];
                     t++;
                 }
             }
