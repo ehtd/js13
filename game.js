@@ -2,8 +2,6 @@
  * Created by ehtd on 8/16/14.
  */
 
-//TODO: Add fog of war, maybe using oil drop
-//TODO: Increase hero attack after killing an enemy, reduce it to normal after certain steps
 
 var STATES = {
     "MENU":"menuState",
@@ -20,6 +18,8 @@ var ctx = canvas.getContext('2d');
 var tileSize = 32;
 var rowTileCount = 48;//canvas.height/tileSize + 10;
 var colTileCount = 48;//canvas.width/tileSize;
+
+var horsesPending = 4;
 
 var destructibleWallProbability = 1;
 
@@ -50,7 +50,7 @@ addEventListener("keydown", function (e) {
 
 
     if (canPressKey){
-        console.log(e.keyCode);
+//        console.log(e.keyCode);
         playerHasMoved = false;
         keysDown[e.keyCode] = true;
         canPressKey = false;
@@ -68,6 +68,8 @@ var topLayer = [[]];
 
 var reset = function () {
 
+
+    horsesPending = 4;
 
     playerAlive = true;
     enemies = [];
@@ -95,6 +97,24 @@ var reset = function () {
     topLayer[hero.y][hero.x] = 0;
 
 };
+
+var isHorse = function(row,column){
+
+    var tile = topLayer[row][column];
+
+    if (tile == horse1 || tile == horse2 || tile == horse3 || tile == horse4){
+        topLayer[row][column] = 0;
+
+        horsesPending --;
+
+        if (horsesPending <= 0){
+            currentState = STATES.WIN;
+        }
+        return true;
+    }
+
+    return false;
+}
 
 var isEnemy = function(row,column){
 
@@ -172,12 +192,13 @@ var moveToPlayer = function(enemy){
 
     if (!playerAlive) return;
 
-    //TODO: Improve, this is first draft
-
     var xDistance = Math.abs(hero.x-enemy.x);
     var yDistance = Math.abs(hero.y-enemy.y);
 
     var manhattanDistance = xDistance + yDistance;
+
+    //Just follow player if near
+    if (manhattanDistance >= 15) return;
 
     if (manhattanDistance == 1){//Attack player directly
 
@@ -272,6 +293,16 @@ var update = function (modifier) {
         return;
     }
 
+    if (currentState == STATES.WIN){
+
+        if (KEY_X in keysDown){
+            currentState = STATES.MENU;
+            reset();
+        }
+
+        return;
+    }
+
     if (KEY_UP in keysDown && !playerHasMoved) {
 
         var row = hero.y - 1;
@@ -288,6 +319,8 @@ var update = function (modifier) {
 
             topLayer[row][column] = 0;
         } else if (isHP(row,column)){
+
+        }else if (isHorse(row,column)){
 
         } else if (isEnemy(row,column)){
             //TODO: add experience or something
@@ -318,6 +351,8 @@ var update = function (modifier) {
             topLayer[row][column] = 0;
         } else if (isHP(row,column)){
 
+        }else if (isHorse(row,column)){
+
         } else if (isEnemy(row,column)){
             //TODO: add experience or something
         } else if (!isHardWall(row,column)) {
@@ -346,6 +381,8 @@ var update = function (modifier) {
             topLayer[row][column] = 0;
         } else if (isHP(row,column)){
 
+        }else if (isHorse(row,column)){
+
         } else if (isEnemy(row,column)){
             //TODO: add experience or something
         } else if (!isHardWall(row,column)) {
@@ -372,6 +409,8 @@ var update = function (modifier) {
 
             topLayer[row][column] = 0;
         } else if (isHP(row,column)){
+
+        }else if (isHorse(row,column)){
 
         } else if (isEnemy(row,column)){
             //TODO: add experience or something
@@ -462,16 +501,6 @@ var drawFOW = function(){
                 FOW[r][c] = 0.7
             }
 
-//            enemies.forEach(function(enemy){
-//                var xDistance = Math.abs(hero.x-enemy.x);
-//                var yDistance = Math.abs(hero.y-enemy.y);
-//
-//                var manhattanDistance = xDistance + yDistance;
-//
-//                if (manhattanDistance < 8){
-//                    FOW[enemy.y][enemy.x] = 0
-//                }
-//            });
         }
     }
 
@@ -504,12 +533,12 @@ var render = function () {
 
         }
 
-        //TODO: improve the display
         ctx.fillStyle = "rgb(250, 250, 250)";
         ctx.font = "24px Helvetica";
         ctx.textAlign = "left";
         ctx.textBaseline = "top";
         ctx.fillText("HP: " + hero.hp + " A: "+hero.attack, 32, 0);
+        ctx.fillText("Horses pending: "+horsesPending, 480, 0);
 
     } else if (currentState == STATES.MENU){
 
@@ -591,6 +620,46 @@ var render = function () {
 
         ctx.fillText("– An honorable death... Press X to RETRY –", 130, 420);
 
+    }else if (currentState == STATES.WIN){
+
+        var shield_maiden_title = [
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0,0.8,0.8,0.8,0,0.8,0,0.8,0,0,0,0.8,0,0.8,0,0.8,0,0.8,0.8,0.8],
+            [0.8,0.8,0,0.8,0.8,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0.8,0.8],
+            [0.8,0.8,0,0.8,0.8,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0.8,0.8],
+            [0.8,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0,0,0,0,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8],
+            [0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8]
+        ];
+
+        for (var r = 0; r < canvas.height/tileSize; r++) {
+            for (var c = 0; c < canvas.width/tileSize; c++) {
+
+                var tile = hardWallIndex;
+                var tileRow = (tile / imageNumTiles) | 0;
+                var tileCol = (tile % imageNumTiles) | 0;
+                ctx.drawImage(tilesetImage, (tileCol * tileSize), (tileRow * tileSize), tileSize, tileSize, ((c) * tileSize), ((r) * tileSize), tileSize, tileSize);
+
+                ctx.fillStyle = "rgba(0, 0, 0,"+shield_maiden_title[r][c]+")";
+                ctx.fillRect(c*tileSize, r*tileSize, tileSize, tileSize);
+            }
+        }
+
+        ctx.fillStyle = "rgb(100, 177, 164)";
+        ctx.font = "24px Helvetica";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+
+        ctx.fillText("– You may enter Valhalla – ", 200, 420);
+
     }
 
 };
@@ -644,11 +713,9 @@ var getEnemy = function (type){
 
 var generateEnemies = function() {
 
-    //TODO: handle multiple rooms
-
     var enemyIndexes = [redCentaurIndex, blueCentaurIndex];
 
-    var enemyNumber = 4;
+    var enemyNumber = 10;
 
     for (i = 0; i < enemyNumber; i++){
 
@@ -695,40 +762,6 @@ var getFullRowWall = function() {
     return row;
 }
 
-var getBorderedRowWall = function() {
-    var row = [];
-    row.push(hardWallIndex);
-    for (var i = 1; i < colTileCount-1; i++){
-
-        if (Math.random() > destructibleWallProbability)  {
-            row.push(0);
-        } else{
-            row.push(destructibleWallIndex);
-        }
-
-
-    }
-    row.push(hardWallIndex);
-    return row;
-}
-
-var generateTerrain = function()
-{
-    //TODO: Add hard wall generation
-
-    var layer = [];
-
-    layer.push(getFullRowWall());
-    for (var i = 1; i < rowTileCount-1; i++){
-        layer.push(getBorderedRowWall());
-    }
-    layer.push(getFullRowWall());
-
-    //Always clear the space for hero
-    layer[hero.y][hero.x] = 0;
-
-    return layer;
-}
 
 var bgReady = false;
 var tilesetImage = new Image();
@@ -758,9 +791,14 @@ function drawTiledBackground () {
             ctx.drawImage(tilesetImage, (tileCol * tileSize), (tileRow * tileSize), tileSize, tileSize, ((c - camera.x) * tileSize), ((r - camera.y) * tileSize), tileSize, tileSize);
 
             tile = topLayer[ r ][ c ];
+
+            var offset = 0;
+            if (tile == horse1 || tile == horse2 || tile == horse3 || tile == horse4){
+                offset += 10;
+            }
             tileRow = (tile / imageNumTiles) | 0;
             tileCol = (tile % imageNumTiles) | 0;
-            ctx.drawImage(tilesetImage, (tileCol * tileSize), (tileRow * tileSize), tileSize, tileSize, ((c - camera.x) * tileSize), ((r - camera.y) * tileSize), tileSize, tileSize);
+            ctx.drawImage(tilesetImage, (tileCol * tileSize), (tileRow * tileSize), tileSize, tileSize, ((c - camera.x) * tileSize), ((r - camera.y) * tileSize)- offset, tileSize, tileSize);
 
         }
     }
@@ -791,6 +829,11 @@ function createWorld()
     return world;
 }
 
+var horse1 = 3;
+var horse2 = 4;
+var horse3 = 5;
+var horse4 = 6;
+
 function generateMap()
 {
     //So, first we make the map
@@ -815,6 +858,51 @@ function generateMap()
         map[y][worldHeight -1] = hardWallIndex;
 
     }
+
+    //Place apocalypse horses
+
+    var x = (Math.floor((Math.random() * (colTileCount-2)) + 1));
+    var y = (Math.floor((Math.random() * (rowTileCount-2)) + 1));
+
+    map[y][x] = horse1;
+
+    console.log("Horse 1 X:"+x+" Y:"+y);
+
+    x = (Math.floor((Math.random() * (colTileCount-2)) + 1));
+    y = (Math.floor((Math.random() * (rowTileCount-2)) + 1));
+
+    while (map[y][x] == horse1){
+        x = (Math.floor((Math.random() * (colTileCount-2)) + 1));
+        y = (Math.floor((Math.random() * (rowTileCount-2)) + 1));
+
+    }
+
+    map[y][x] = horse2;
+    console.log("Horse 2 X:"+x+" Y:"+y);
+
+    x = (Math.floor((Math.random() * (colTileCount-2)) + 1));
+    y = (Math.floor((Math.random() * (rowTileCount-2)) + 1));
+
+    while (map[y][x] == horse1 || map[y][x] == horse2){
+        x = (Math.floor((Math.random() * (colTileCount-2)) + 1));
+        y = (Math.floor((Math.random() * (rowTileCount-2)) + 1));
+
+    }
+
+    map[y][x] = horse3;
+    console.log("Horse 3 X:"+x+" Y:"+y);
+
+    x = (Math.floor((Math.random() * (colTileCount-2)) + 1));
+    y = (Math.floor((Math.random() * (rowTileCount-2)) + 1));
+
+    while (map[y][x] == horse1 || map[y][x] == horse2 || map[y][x] == horse3){
+        x = (Math.floor((Math.random() * (colTileCount-2)) + 1));
+        y = (Math.floor((Math.random() * (rowTileCount-2)) + 1));
+
+    }
+
+    map[y][x] = horse4;
+    console.log("Horse 4 X:"+x+" Y:"+y);
 
     //And we're done!
     return map;
@@ -846,7 +934,7 @@ function placeTreasure(map)
             }
         }
     }
-    console.log("Treasures: "+t);
+//    console.log("Treasures: "+t);
 }
 
 function initialiseMap(map)
