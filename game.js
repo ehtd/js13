@@ -730,7 +730,7 @@ var getEnemy = function (type){
 
             break;
         case blueCentaurIndex:
-            enemy.hp = 1;
+            enemy.hp = 10;
 
             break;
 
@@ -743,12 +743,13 @@ var generateEnemies = function() {
 
     var enemyIndexes = [redCentaurIndex, blueCentaurIndex];
 
-    var enemyNumber = 10;
+    var enemyNumber = 15;
 
     for (i = 0; i < enemyNumber; i++){
 
-        //TODO: random enemies
-        var enemy = getEnemy(redCentaurIndex);
+        var value = Math.floor(Math.random() * (enemyIndexes.length));
+
+        var enemy = getEnemy(enemyIndexes[value]);
         enemies.push(enemy);
     }
 
