@@ -20,13 +20,15 @@
     <canvas id=myCanvas width="704" height="480"></canvas>
 
     <br>
-    <input type=text id=formula value="((t*15) | t | t>>7)&255" size=60/>
-    <button id=generate>&#x266a; Generate sound &#x266c;</button>
+    <input type=text id=formula value="((t*5&t>>7) | (t*3&t>>10))&255" style="display: none;"size=60/>
+    <button id=generate style="display: none;">&#x266a; Generate sound &#x266c;</button>
     <audio id=audio controls loop style="display: none;"></audio>
 
     <script src="player.js"></script>
     <script src="game.js"></script>
-
+    <script>
+        window.onload = startPlayer();
+    </script>
 
 </body>
 </html>

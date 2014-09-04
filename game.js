@@ -278,6 +278,8 @@ var update = function (modifier) {
 
         if (KEY_X in keysDown){
             currentState = STATES.GAME;
+            player.src = jsfxr(sounds.start);
+            player.play();
         }
 
         return;
@@ -311,6 +313,7 @@ var update = function (modifier) {
 
         if (isDestructibleWall(row,column)){
             topLayer[row][column] = 0;
+            player.src = jsfxr(sounds.dirt);
         } else if(isTreasure(row,column)){
             var specialProperties = [1,2,1,1,1,1,1];
             var value = Math.floor(Math.random() * (specialProperties.length));
@@ -318,14 +321,19 @@ var update = function (modifier) {
             hero.attack += specialProperties[value];
 
             topLayer[row][column] = 0;
+            player.src = jsfxr(sounds.treasure);
         } else if (isHP(row,column)){
-
+            player.src = jsfxr(sounds.hp);
         }else if (isHorse(row,column)){
-
+            player.src = jsfxr(sounds.horse);
         } else if (isEnemy(row,column)){
             //TODO: add experience or something
+            player.src = jsfxr(sounds.enemy);
         } else if (!isHardWall(row,column)){
             hero.y -= hero.speed;
+            player.src = jsfxr(sounds.move);
+        } else{
+            player.src = jsfxr(sounds.move);
         }
 
         playerHasMoved = true;
@@ -342,6 +350,8 @@ var update = function (modifier) {
 
         if (isDestructibleWall(row,column)){
             topLayer[row][column] = 0;
+            player.src = jsfxr(sounds.dirt);
+
         } else if(isTreasure(row,column)){
             var specialProperties = [1,2,1,1,1,1,1];
             var value = Math.floor(Math.random() * (specialProperties.length));
@@ -349,14 +359,19 @@ var update = function (modifier) {
             hero.attack += specialProperties[value];
 
             topLayer[row][column] = 0;
+            player.src = jsfxr(sounds.treasure);
         } else if (isHP(row,column)){
-
+            player.src = jsfxr(sounds.hp);
         }else if (isHorse(row,column)){
-
+            player.src = jsfxr(sounds.horse);
         } else if (isEnemy(row,column)){
             //TODO: add experience or something
+            player.src = jsfxr(sounds.enemy);
         } else if (!isHardWall(row,column)) {
             hero.y += hero.speed;
+            player.src = jsfxr(sounds.move);
+        }else{
+            player.src = jsfxr(sounds.move);
         }
 
         playerHasMoved = true;
@@ -372,6 +387,8 @@ var update = function (modifier) {
 
         if (isDestructibleWall(row,column)){
             topLayer[row][column] = 0;
+            player.src = jsfxr(sounds.dirt);
+
         } else if(isTreasure(row,column)){
             var specialProperties = [1,2,1,1,1,1,1];
             var value = Math.floor(Math.random() * (specialProperties.length));
@@ -379,19 +396,23 @@ var update = function (modifier) {
             hero.attack += specialProperties[value];
 
             topLayer[row][column] = 0;
+            player.src = jsfxr(sounds.treasure);
         } else if (isHP(row,column)){
-
+            player.src = jsfxr(sounds.hp);
         }else if (isHorse(row,column)){
-
+            player.src = jsfxr(sounds.horse);
         } else if (isEnemy(row,column)){
             //TODO: add experience or something
+            player.src = jsfxr(sounds.enemy);
         } else if (!isHardWall(row,column)) {
             hero.x -= hero.speed;
+            player.src = jsfxr(sounds.move);
+        }else{
+            player.src = jsfxr(sounds.move);
         }
         playerHasMoved = true;
 
         enemies.forEach(moveToPlayer);
-
         player.play();
     }
     if (KEY_RIGHT in keysDown && !playerHasMoved) {
@@ -401,6 +422,8 @@ var update = function (modifier) {
 
         if (isDestructibleWall(row,column)){
             topLayer[row][column] = 0;
+            player.src = jsfxr(sounds.dirt);
+
         } else if(isTreasure(row,column)){
             var specialProperties = [1,2,1,1,1,1,1];
             var value = Math.floor(Math.random() * (specialProperties.length));
@@ -408,14 +431,19 @@ var update = function (modifier) {
             hero.attack += specialProperties[value];
 
             topLayer[row][column] = 0;
+            player.src = jsfxr(sounds.treasure);
         } else if (isHP(row,column)){
-
+            player.src = jsfxr(sounds.hp);
         }else if (isHorse(row,column)){
-
+            player.src = jsfxr(sounds.horse);
         } else if (isEnemy(row,column)){
             //TODO: add experience or something
+            player.src = jsfxr(sounds.enemy);
         } else if (!isHardWall(row,column)) {
             hero.x += hero.speed;
+            player.src = jsfxr(sounds.move);
+        }else{
+            player.src = jsfxr(sounds.move);
         }
         playerHasMoved = true;
 
